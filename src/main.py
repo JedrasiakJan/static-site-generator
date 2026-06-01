@@ -1,7 +1,8 @@
 from textnode import TextNode, TextType
 import os 
 import shutil
-
+import sys 
+from block_markdown import generate_page, generate_pages_recursive
 def kopiarka():
     if os.path.exists("public"):
         shutil.rmtree("public")
@@ -23,7 +24,19 @@ def rekursywna_kopia(source_dir, dest_dir):
 
 
 def main():
-    kopiarka()
-    rekursywna_kopia("src/static", "public")
+    basepath = "/"
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    
+    output_dir = "docs"
+    
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.mkdir(output_dir)
+    
+    rekursywna_kopia("static", output_dir)
+    
+    generate_pages_recursive("content", "template.html", output_dir, basepath)
+
 if __name__ == "__main__":
     main()

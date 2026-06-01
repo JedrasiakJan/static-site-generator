@@ -3,7 +3,7 @@ from textnode import TextNode, TextType, text_node_to_html_node
 from htmlnode import HTMLNode, LeafNode, ParentNode
 from split_nodes import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
 from extract import extract_markdown_images, extract_markdown_links
-from block_markdown import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
+from block_markdown import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node, extract_title
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
         node = TextNode("This is a text node", TextType.BOLD)
@@ -389,5 +389,26 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+    def test_extract_title(self):
+        # Sprawdzenie poprawnego działania
+        markdown = "# Tolkien Fan Club"
+        self.assertEqual(extract_title(markdown), "Tolkien Fan Club")
+
+    def test_extract_title_with_extra_spaces(self):
+        # Sprawdzenie czy strip działa (usuwanie spacji wokół)
+        markdown = "#    Tolkien Fan Club    "
+        self.assertEqual(extract_title(markdown), "Tolkien Fan Club")
+
+    def test_extract_title_no_header(self):
+        # Sprawdzenie czy wyrzuca błąd, gdy brak #
+        markdown = "To jest tylko paragraf bez nagłówka"
+        with self.assertRaises(Exception):
+            extract_title(markdown)
+
+    def test_extract_title_multiple_headers(self):
+        # Sprawdzenie czy wyłapuje tylko pierwszy napotkany #
+        markdown = "# Pierwszy\n## Drugi"
+        self.assertEqual(extract_title(markdown), "Pierwszy")
 if __name__ == "__main__":
     unittest.main()
